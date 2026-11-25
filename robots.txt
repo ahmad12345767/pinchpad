@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ahmad12345767.github.io/pinchpad/sitemap.xml

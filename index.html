@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PinchPad: the full-screen app grid for macOS Tahoe</title>
+  <meta name="description" content="PinchPad brings back the big full-screen app grid on macOS 26 Tahoe. Pinch to open, Liquid Glass search, folders, drag to arrange. $18 one-time purchase.">
+  <meta name="keywords" content="Launchpad alternative, macOS Tahoe Launchpad, app launcher Mac, full screen app grid, bring back Launchpad, macOS 26 app grid, pinch gesture launcher">
+  <link rel="canonical" href="https://ahmad12345767.github.io/pinchpad/">
+  <meta name="theme-color" content="#14122b">
+
+  <!-- Sharing previews (iMessage, WhatsApp, X, Facebook…) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PinchPad">
+  <meta property="og:title" content="PinchPad: the full-screen app grid for macOS Tahoe">
+  <meta property="og:description" content="Pinch to open a big, beautiful grid of all your apps. Liquid Glass search, folders, drag to arrange. $18, one time.">
+  <meta property="og:url" content="https://ahmad12345767.github.io/pinchpad/">
+  <meta property="og:image" content="https://ahmad12345767.github.io/pinchpad/assets/og.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <!-- Helps Google show price and details in search results -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PinchPad",
+    "operatingSystem": "macOS 26 Tahoe or later",
+    "applicationCategory": "UtilitiesApplication",
+    "description": "A full-screen app grid for macOS Tahoe. Pinch to open, Liquid Glass search, folders and drag to arrange.",
+    "image": "https://ahmad12345767.github.io/pinchpad/assets/icon-512.png",
+    "screenshot": "https://ahmad12345767.github.io/pinchpad/assets/shot-grid.jpg",
+    "url": "https://ahmad12345767.github.io/pinchpad/",
+    "softwareVersion": "1.0",
+    "offers": { "@type": "Offer", "price": "18.00", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #0d0c1d;
+      --text: #f4f3fb;
+      --muted: #a9a6c4;
+      --card: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(255, 255, 255, 0.11);
+      --accent: #7b6cff;
+      --accent-2: #3fb6ff;
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    /* Soft color glow behind everything, like the app's wallpaper blur */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: -20%;
+      z-index: -1;
+      background:
+        radial-gradient(40% 35% at 18% 20%, rgba(123, 76, 220, 0.45), transparent 70%),
+        radial-gradient(35% 30% at 85% 15%, rgba(40, 120, 240, 0.40), transparent 70%),
+        radial-gradient(40% 35% at 70% 80%, rgba(240, 100, 110, 0.30), transparent 70%),
+        radial-gradient(35% 35% at 10% 85%, rgba(30, 170, 180, 0.30), transparent 70%);
+      filter: blur(40px);
+    }
+    a { color: inherit; }
+    .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+    /* Navigation */
+    nav {
+      position: sticky; top: 0; z-index: 10;
+      backdrop-filter: saturate(160%) blur(20px);
+      -webkit-backdrop-filter: saturate(160%) blur(20px);
+      background: rgba(13, 12, 29, 0.55);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 19px; text-decoration: none; }
+    .brand img { width: 34px; height: 34px; }
+    .nav-links { display: flex; align-items: center; gap: 26px; font-size: 15px; }
+    .nav-links a:not(.btn) { color: var(--muted); text-decoration: none; }
+    .nav-links a:not(.btn):hover { color: var(--text); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 26px; border-radius: 999px; border: 0;
+      font: 600 17px/1 inherit; font-family: inherit; text-decoration: none; cursor: pointer;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 30px -8px rgba(110, 100, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 36px -8px rgba(110, 100, 255, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+    .btn.small { padding: 10px 18px; font-size: 15px; }
+    .btn.ghost { background: var(--card); box-shadow: inset 0 0 0 1px var(--card-border); }
+
+    /* Hero */
+    .hero { text-align: center; padding: 80px 0 40px; }
+    .hero .app-icon { width: 128px; height: 128px; filter: drop-shadow(0 20px 40px rgba(80, 60, 200, 0.5)); }
+    h1 {
+      font-size: clamp(40px, 6.4vw, 76px); line-height: 1.03; letter-spacing: -0.035em;
+      margin: 18px auto 18px; max-width: 900px; font-weight: 800;
+    }
+    .gradient-text {
+      background: linear-gradient(120deg, #c9b8ff 0%, #8fd3ff 50%, #ffb3c1 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .lead { font-size: clamp(18px, 2.1vw, 21px); color: var(--muted); max-width: 680px; margin: 0 auto 34px; }
+    .cta-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+    .fineprint { margin-top: 16px; font-size: 14px; color: var(--muted); }
+
+    /* Screenshot in a soft glass frame */
+    .shot {
+      margin: 60px auto 0; max-width: 1040px; padding: 10px;
+      border-radius: 28px; background: var(--card); border: 1px solid var(--card-border);
+      box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.8);
+    }
+    .shot img { display: block; width: 100%; height: auto; border-radius: 20px; }
+
+    /* Sections */
+    section { padding: 100px 0 0; }
+    .section-title { text-align: center; font-size: clamp(30px, 4vw, 46px); letter-spacing: -0.03em; margin: 0 0 14px; font-weight: 800; }
+    .section-lead { text-align: center; color: var(--muted); max-width: 620px; margin: 0 auto 50px; font-size: 19px; }
+
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .feature {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: var(--radius);
+      padding: 26px; transition: transform 0.25s ease, background 0.25s ease;
+    }
+    .feature:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.08); }
+    .feature .emoji {
+      width: 46px; height: 46px; border-radius: 13px; display: grid; place-items: center; font-size: 24px;
+      background: linear-gradient(135deg, rgba(123, 108, 255, 0.35), rgba(63, 182, 255, 0.25));
+      border: 1px solid var(--card-border); margin-bottom: 16px;
+    }
+    .feature h3 { margin: 0 0 8px; font-size: 19px; letter-spacing: -0.01em; }
+    .feature p { margin: 0; color: var(--muted); font-size: 15.5px; }
+
+    .split { display: grid; grid-template-columns: 1.15fr 1fr; gap: 50px; align-items: center; }
+    .split .shot { margin: 0; }
+    .split h2 { font-size: clamp(28px, 3.6vw, 42px); letter-spacing: -0.03em; margin: 0 0 16px; line-height: 1.1; }
+    .split p { color: var(--muted); font-size: 18px; }
+    .checks { list-style: none; padding: 0; margin: 22px 0 0; }
+    .checks li { padding-left: 30px; position: relative; margin: 10px 0; }
+    .checks li::before { content: "✓"; position: absolute; left: 0; color: #8fd3ff; font-weight: 700; }
+
+    /* Pricing */
+    .price-card {
+      max-width: 460px; margin: 0 auto; text-align: center; padding: 40px 36px;
+      border-radius: 30px; background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04));
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      box-shadow: 0 40px 100px -30px rgba(90, 70, 220, 0.55);
+    }
+    .price-card img { width: 84px; height: 84px; }
+    .price { font-size: 68px; font-weight: 800; letter-spacing: -0.04em; margin: 8px 0 0; }
+    .price small { font-size: 20px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+    .price-card .checks { text-align: left; display: inline-block; margin: 20px 0 28px; }
+    .price-card .btn { width: 100%; }
+
+    /* FAQ */
+    .faq { max-width: 760px; margin: 0 auto; }
+    details {
+      background: var(--card); border: 1px solid var(--card-border); border-radius: 18px;
+      padding: 18px 22px; margin-bottom: 12px;
+    }
+    summary { cursor: pointer; font-weight: 600; font-size: 17.5px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+    summary::-webkit-details-marker { display: none; }
+    summary::after { content: "+"; color: var(--muted); font-weight: 400; font-size: 22px; line-height: 1; transition: transform 0.2s; }
+    details[open] summary::after { transform: rotate(45deg); }
+    details p, details ol { color: var(--muted); margin: 12px 0 0; }
+    details ol { padding-left: 20px; }
+
+    footer { padding: 90px 0 50px; text-align: center; color: var(--muted); font-size: 14px; }
+    footer .disclaimer { max-width: 640px; margin: 12px auto 0; opacity: 0.75; font-size: 13px; }
+
+    /* Toast shown if checkout isn't connected yet */
+    .toast {
+      position: fixed; left: 50%; bottom: 28px; transform: translate(-50%, 30px); opacity: 0;
+      padding: 14px 22px; border-radius: 14px; background: rgba(30, 28, 60, 0.92);
+      border: 1px solid var(--card-border); transition: all 0.3s ease; pointer-events: none; font-size: 15px;
+    }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+    /* Fade sections in as you scroll */
+    .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    @media (max-width: 900px) {
+      .features { grid-template-columns: repeat(2, 1fr); }
+      .split { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .wrap { padding: 0 16px; }
+      .features { grid-template-columns: 1fr; }
+      .nav-links a:not(.btn) { display: none; }
+      .hero { padding-top: 50px; }
+      .hero .app-icon { width: 96px; height: 96px; }
+      section { padding-top: 70px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="wrap">
+      <a class="brand" href="#top"><img src="assets/icon-512.png" alt="">PinchPad</a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn small buy" href="#pricing">Buy · $18</a>
+      </div>
+    </div>
+  </nav>
+
+  <main id="top">
+    <header class="hero wrap">
+      <img class="app-icon" src="assets/icon-512.png" alt="PinchPad app icon" width="128" height="128">
+      <h1>Your full-screen app grid is <span class="gradient-text">back.</span></h1>
+      <p class="lead">macOS Tahoe swapped the big, beautiful grid of apps for a small window. PinchPad brings it back with a pinch of your fingers, Liquid Glass and silky-smooth animations.</p>
+      <div class="cta-row">
+        <a class="btn buy" href="#pricing"> Buy &amp; Download · $18</a>
+        <a class="btn ghost" href="#features">See what it does</a>
+      </div>
+      <p class="fineprint">One-time purchase · No subscription · For macOS 26 Tahoe</p>
+
+      <div class="shot reveal">
+        <img src="assets/shot-grid.jpg" alt="PinchPad showing a full-screen grid of apps over a blurred wallpaper" width="2400" height="1558">
+      </div>
+    </header>
+
+    <section id="features" class="wrap">
+      <h2 class="section-title reveal">Everything you missed, and more.</h2>
+      <p class="section-lead reveal">Built natively for macOS Tahoe. Fast, light, and it feels like it was always part of your Mac.</p>
+
+      <div class="features">
+        <div class="feature reveal">
+          <div class="emoji">🤏</div>
+          <h3>Pinch to open</h3>
+          <p>Pinch 3 or 4 fingers together and the grid follows your fingers in. Spread them to close. A light touch is all it takes.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="emoji">🔍</div>
+          <h3>Instant search</h3>
+          <p>Just start typing. The Liquid Glass search bar finds apps as you type; press Return to open.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="emoji">🗂️</div>
+          <h3>Folders &amp; drag to arrange</h3>
+          <p>Drag apps wherever you like. Drop one app on another to make a folder, and click a folder's name to rename it.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="emoji">✨</div>
+          <h3>Buttery smooth</h3>
+          <p>Pages glide in step with your display, up to 120 frames per second, and icons stay pin-sharp while they move.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="emoji">⌨️</div>
+          <h3>Keyboard shortcut</h3>
+          <p>Prefer the keyboard? Open it with ⌃⌥Space or any shortcut you like, and move around with the arrow keys.</p>
+        </div>
+        <div class="feature reveal">
+          <div class="emoji">⚡️</div>
+          <h3>Always up to date</h3>
+          <p>Install or delete an app and the grid updates by itself, instantly. Your layout is remembered.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap">
+      <div class="split">
+        <div class="shot reveal">
+          <img src="assets/shot-folder.jpg" alt="A PinchPad folder open as a wide frosted glass panel" width="2400" height="1558" loading="lazy">
+        </div>
+        <div class="reveal">
+          <h2>Made to feel right.</h2>
+          <p>Every detail was tuned until it felt natural, from the frosted folders to the way pages glide and settle.</p>
+          <ul class="checks">
+            <li>Opens on the page you were last on</li>
+            <li>Frosted glass folders that match macOS Tahoe</li>
+            <li>One click turns off macOS's own pinch, so only PinchPad opens</li>
+            <li>No account, no tracking, works fully offline</li>
+            <li>Runs quietly in the menu bar, and can open at login</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="pricing" class="wrap">
+      <h2 class="section-title reveal">One price. Yours forever.</h2>
+      <p class="section-lead reveal">No subscription and no in-app purchases. Pay once and keep it.</p>
+      <div class="price-card reveal">
+        <img src="assets/icon-512.png" alt="" width="84" height="84">
+        <div class="price">$18 <small>one time</small></div>
+        <ul class="checks">
+          <li>PinchPad for your Mac</li>
+          <li>Free updates for version 1</li>
+          <li>Apple Silicon and Intel</li>
+          <li>Instant download after purchase</li>
+        </ul>
+        <a class="btn buy" href="#pricing"> Buy &amp; Download · $18</a>
+        <p class="fineprint">Secure checkout by Lemon Squeezy. Taxes are handled for you.</p>
+      </div>
+    </section>
+
+    <section id="faq" class="wrap">
+      <h2 class="section-title reveal">Questions</h2>
+      <div class="faq reveal" style="margin-top: 40px;">
+        <details>
+          <summary>What do I need to run PinchPad?</summary>
+          <p>A Mac with macOS 26 Tahoe or later, on Apple Silicon or Intel. The pinch gesture needs a trackpad; without one, use the keyboard shortcut or the menu bar icon.</p>
+        </details>
+        <details>
+          <summary>How do I install it?</summary>
+          <ol>
+            <li>After buying, download the zip file and open it.</li>
+            <li>Drag <strong>PinchPad</strong> into your <strong>Applications</strong> folder and open it.</li>
+            <li>If macOS says it can't verify the app, open <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click <strong>Open Anyway</strong>. You only need to do this once.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Will it fight with macOS's own pinch gesture?</summary>
+          <p>No. macOS 26 removed the switch for its pinch gesture, so PinchPad has a one-click <strong>Turn Off macOS Pinch</strong> button in its settings. You can turn it back on just as easily.</p>
+        </details>
+        <details>
+          <summary>Does PinchPad need any permissions?</summary>
+          <p>None to get started. Optionally, Accessibility permission lets PinchPad stop four-finger swipes from switching desktops while the grid is open.</p>
+        </details>
+        <details>
+          <summary>Does it collect any data?</summary>
+          <p>No. PinchPad has no accounts, no analytics and never connects to the internet. Everything stays on your Mac.</p>
+        </details>
+        <details>
+          <summary>Is PinchPad made by Apple?</summary>
+          <p>No. PinchPad is an independent app and isn't affiliated with or endorsed by Apple.</p>
+        </details>
+        <details>
+          <summary>I have a question about my purchase.</summary>
+          <p>Reply to the receipt email from your purchase and we'll help you out.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <div>© <span id="year">2026</span> PinchPad</div>
+      <p class="disclaimer">PinchPad is not affiliated with Apple Inc. Mac, macOS, Launchpad and Liquid Glass are trademarks of Apple Inc., registered in the U.S. and other countries.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast">Checkout is opening very soon. Check back shortly!</div>
+
+  <script>
+    // ── Paste your Lemon Squeezy checkout link here ──────────────────────────
+    // Lemon Squeezy → Store → Products → PinchPad → Share → copy the checkout URL.
+    const CHECKOUT_URL = "";
+    // ─────────────────────────────────────────────────────────────────────────
+
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    const buttons = document.querySelectorAll(".buy");
+    if (CHECKOUT_URL) {
+      buttons.forEach((b) => {
+        b.href = CHECKOUT_URL;
+        b.classList.add("lemonsqueezy-button"); // opens checkout as an overlay
+      });
+      const s = document.createElement("script");
+      s.src = "https://app.lemonsqueezy.com/js/lemon.js";
+      s.defer = true;
+      document.head.appendChild(s);
+    } else {
+      // No store link yet: the nav/hero buttons scroll to pricing; the pricing button explains.
+      const toast = document.getElementById("toast");
+      document.querySelectorAll(".price-card .buy").forEach((b) =>
+        b.addEventListener("click", (e) => {
+          e.preventDefault();
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 3000);
+        })
+      );
+    }
+
+    // Fade sections in as they scroll into view.
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+  </script>
+</body>
+</html>
