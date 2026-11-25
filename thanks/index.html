@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Thank you · PinchPad</title>
+  <!-- Keep this page out of search results -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#14122b">
+  <link rel="icon" type="image/png" href="../assets/favicon.png">
+  <style>
+    :root { --bg: #0d0c1d; --text: #f4f3fb; --muted: #a9a6c4; --card: rgba(255,255,255,0.06); --card-border: rgba(255,255,255,0.11); --accent: #7b6cff; --accent-2: #3fb6ff; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+      font: 17px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      -webkit-font-smoothing: antialiased; display: flex; align-items: center; justify-content: center; padding: 40px 16px;
+    }
+    body::before {
+      content: ""; position: fixed; inset: -20%; z-index: -1; filter: blur(40px);
+      background:
+        radial-gradient(40% 35% at 18% 20%, rgba(123,76,220,0.45), transparent 70%),
+        radial-gradient(35% 30% at 85% 15%, rgba(40,120,240,0.40), transparent 70%),
+        radial-gradient(40% 35% at 70% 80%, rgba(240,100,110,0.30), transparent 70%);
+    }
+    .card {
+      width: 100%; max-width: 560px; text-align: center; padding: 44px 36px; border-radius: 30px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.10), rgba(255,255,255,0.04));
+      border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 40px 100px -30px rgba(90,70,220,0.55);
+    }
+    .card img { width: 96px; height: 96px; filter: drop-shadow(0 16px 30px rgba(80,60,200,0.5)); }
+    h1 { font-size: 36px; letter-spacing: -0.03em; margin: 18px 0 8px; }
+    p { color: var(--muted); margin: 0 0 24px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+      padding: 16px 26px; border-radius: 999px; font: 600 18px/1 inherit; font-family: inherit;
+      text-decoration: none; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      box-shadow: 0 10px 30px -8px rgba(110,100,255,0.7), inset 0 1px 0 rgba(255,255,255,0.35);
+    }
+    .steps { text-align: left; margin: 30px 0 0; padding: 22px 24px 22px 44px; border-radius: 18px; background: var(--card); border: 1px solid var(--card-border); color: var(--muted); }
+    .steps li { margin: 8px 0; }
+    .steps strong { color: var(--text); }
+    .missing { display: none; }
+    .home { display: inline-block; margin-top: 24px; color: var(--muted); font-size: 15px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <img src="../assets/icon-512.png" alt="PinchPad app icon">
+    <h1>Thank you!</h1>
+
+    <div id="ready">
+      <p>Your purchase is complete. Download PinchPad below, and keep this page's address if you want to download it again later.</p>
+      <a class="btn" id="download" href="#">Download PinchPad</a>
+      <ol class="steps">
+        <li>Open the downloaded <strong>PinchPad-1.0.zip</strong>.</li>
+        <li>Drag <strong>PinchPad</strong> into your <strong>Applications</strong> folder and open it.</li>
+        <li>If macOS says it can't verify the app, go to <strong>System Settings → Privacy &amp; Security</strong>, scroll down and click <strong>Open Anyway</strong>. You only need to do this once.</li>
+        <li>In PinchPad's settings, click <strong>Turn Off macOS Pinch</strong>, then pinch 4 fingers together on your trackpad.</li>
+      </ol>
+    </div>
+
+    <div id="missing" class="missing">
+      <p>This page needs the download link from your purchase. Please open the link you were sent to after checkout, or reply to your receipt email and we'll send it again.</p>
+    </div>
+
+    <a class="home" href="../">← Back to PinchPad</a>
+  </main>
+
+  <script>
+    // The download's file ID comes from the address Stripe redirects to after
+    // payment (…/thanks/?f=FILE_ID), so it never appears on the public website.
+    const id = new URLSearchParams(location.search).get("f") || "";
+    if (/^[A-Za-z0-9_-]{20,80}$/.test(id)) {
+      document.getElementById("download").href =
+        "https://drive.usercontent.google.com/download?id=" + encodeURIComponent(id) + "&export=download";
+    } else {
+      document.getElementById("ready").style.display = "none";
+      document.getElementById("missing").style.display = "block";
+    }
+  </script>
+</body>
+</html>

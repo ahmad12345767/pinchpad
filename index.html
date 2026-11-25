@@ -314,7 +314,7 @@
           <li>Instant download after purchase</li>
         </ul>
         <a class="btn buy" href="#pricing"> Buy &amp; Download · $18</a>
-        <p class="fineprint">Secure checkout by Lemon Squeezy. Taxes are handled for you.</p>
+        <p class="fineprint">Secure checkout by Stripe. Pay with card, Apple Pay or Google Pay.</p>
       </div>
     </section>
 
@@ -367,8 +367,9 @@
   <div class="toast" id="toast">Checkout is opening very soon. Check back shortly!</div>
 
   <script>
-    // ── Paste your Lemon Squeezy checkout link here ──────────────────────────
-    // Lemon Squeezy → Store → Products → PinchPad → Share → copy the checkout URL.
+    // ── Paste your Stripe Payment Link here ─────────────────────────────────
+    // Stripe → Product catalogue → PinchPad → Create payment link → copy the URL
+    // (it looks like https://buy.stripe.com/...).
     const CHECKOUT_URL = "";
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -376,14 +377,7 @@
 
     const buttons = document.querySelectorAll(".buy");
     if (CHECKOUT_URL) {
-      buttons.forEach((b) => {
-        b.href = CHECKOUT_URL;
-        b.classList.add("lemonsqueezy-button"); // opens checkout as an overlay
-      });
-      const s = document.createElement("script");
-      s.src = "https://app.lemonsqueezy.com/js/lemon.js";
-      s.defer = true;
-      document.head.appendChild(s);
+      buttons.forEach((b) => { b.href = CHECKOUT_URL; });
     } else {
       // No store link yet: the nav/hero buttons scroll to pricing; the pricing button explains.
       const toast = document.getElementById("toast");
